@@ -2,29 +2,90 @@ document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
   
-    // Preguntar al usuario por las dimensiones del espacio de juego
     const rows = prompt('Ingrese el número de filas:');
     const columns = prompt('Ingrese el número de columnas:');
   
-    // Definir el tamaño de cada celda
     const cellSize = 30;
     canvas.width = columns * cellSize;
     canvas.height = rows * cellSize;
   
-    // Crear el espacio de juego
     const gameBoard = createGameBoard(rows, columns);
+    let pacmanRow = 0;
+    let pacmanColumn = 0;
   
-    // Dibujar las celdas iniciales
+    // Almacena las posiciones de los fantasmas
+    const ghosts = [];
+  
     drawGameBoard(ctx, gameBoard, cellSize);
+    drawElement(ctx, pacmanRow, pacmanColumn, 'pacman', cellSize);
   
-    // Dibujar los elementos iniciales
-    drawElement(ctx, 0, 0, 'pacman', cellSize); // Pacman en la esquina superior izquierda
-  
-    // Colocar 4 fantasmas en posiciones aleatorias
+    // Coloca 4 fantasmas en posiciones aleatorias
     for (let i = 0; i < 4; i++) {
       const randomRow = Math.floor(Math.random() * rows);
       const randomColumn = Math.floor(Math.random() * columns);
+      ghosts.push({ row: randomRow, column: randomColumn });
       drawElement(ctx, randomRow, randomColumn, 'ghost', cellSize);
+    }
+  
+    document.addEventListener('keydown', function (event) {
+      let moved = false;
+  
+      switch (event.key) {
+        case 'ArrowUp':
+          moved = movePacman('up');
+          break;
+        case 'ArrowDown':
+          moved = movePacman('down');
+          break;
+        case 'ArrowLeft':
+          moved = movePacman('left');
+          break;
+        case 'ArrowRight':
+          moved = movePacman('right');
+          break;
+      }
+  
+      if (moved) {
+        // Limpiar el tablero y volver a dibujar todos los elementos
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGameBoard(ctx, gameBoard, cellSize);
+        drawElement(ctx, pacmanRow, pacmanColumn, 'pacman', cellSize);
+  
+        // Volver a dibujar los fantasmas
+        for (const ghost of ghosts) {
+          drawElement(ctx, ghost.row, ghost.column, 'ghost', cellSize);
+        }
+      }
+    });
+  
+    function movePacman(direction) {
+      // Calcular la nueva posición del Pacman según la dirección
+      let newPacmanRow = pacmanRow;
+      let newPacmanColumn = pacmanColumn;
+  
+      switch (direction) {
+        case 'up':
+          if (pacmanRow > 0) newPacmanRow--;
+          break;
+        case 'down':
+          if (pacmanRow < rows - 1) newPacmanRow++;
+          break;
+        case 'left':
+          if (pacmanColumn > 0) newPacmanColumn--;
+          break;
+        case 'right':
+          if (pacmanColumn < columns - 1) newPacmanColumn++;
+          break;
+      }
+  
+      // Verificar si la nueva posición está ocupada por un muro
+      if (gameBoard[newPacmanRow][newPacmanColumn] === 'empty') {
+        pacmanRow = newPacmanRow;
+        pacmanColumn = newPacmanColumn;
+        return true; // Se movió con éxito
+      }
+  
+      return false; // No se movió debido a un obstáculo
     }
   });
   
