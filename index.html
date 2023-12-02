@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pacman Variante</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    canvas {
+      display: block;
+      border: 1px solid #ccc;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+    }
+  </style>
+  <title>Space Invaders</title>
 </head>
-<body>
-  <div class="container-fluid">
-    <header class="h-18 p-4 w-screen bg-green-800 text-white">
-      <h1>Pacman - Intel·ligència Artificial a la Comunicació</h1>
-    </header>
-    <body>
-      <form action=""></form>
-      <canvas id="gameCanvas" class="mx-auto mt-8 border border-gray-500"></canvas>
-
-    </body>
-  </div>
- 
+<body class="bg-gray-200">
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
 
   <script src="index.js"></script>
 </body>

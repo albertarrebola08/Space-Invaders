@@ -1,219 +1,334 @@
+
 document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
 
-  const rows = prompt('Ingrese el número de filas:');
-  const columns = prompt('Ingrese el número de columnas:');
+  const shipWidth = 40;
+  const shipHeight = 20;
+  const bulletWidth = 5;
+  const bulletHeight = 10;
+  const playerShipSpeed = 5;
+  const enemyShipSpeed = 1;
+  const coinSpeed = 0.5;
+  const lifeSpeed = 0.3;
+  const bulletSpeed = 5;
+  const objects = [];
+  const bullets = [];
+  const ships = [];
+  let rightPressed = false;
+  let leftPressed = false;
+  let upPressed = false;
+  let downPressed = false;
+  let spacePressed = false;
+  let lastSpawnTime = 0;
+  let lives = 10;
+  let score = 0;
 
-  const cellSize = 30;
-  canvas.width = columns * cellSize;
-  canvas.height = rows * cellSize;
+  const playerShip = {
+    x: (canvas.width - shipWidth) / 2,
+    y: canvas.height - shipHeight,
+    speed: playerShipSpeed,
+    type: 'player',
+    firing: false
+  };
 
-  const gameBoard = createGameBoard(rows, columns);
-  let pacmanRow = 0;
-  let pacmanColumn = 0;
+  const coinImage = new Image();
+  coinImage.src = 'coin-image.webp'; // Reemplaza 'path/to/coin-image.png' con la ruta real de tu imagen de moneda
 
-  const ghosts = [];
+  const lifeImage = new Image();
+  lifeImage.src = 'life-image.png'; // Reemplaza 'path/to/life-image.png' con la ruta real de tu imagen de vida
 
-  drawGameBoard(ctx, gameBoard, cellSize);
-  drawElement(ctx, pacmanRow, pacmanColumn, 'pacman', cellSize);
+  const enemyShipImages = [
+    'enemy-ship-type-1.png',
+    'enemy-ship-type-2.png',
+    'enemy-ship-type-3.png'
+  ];
 
-  for (let i = 0; i < 4; i++) {
-    const randomRow = Math.floor(Math.random() * rows);
-    const randomColumn = Math.floor(Math.random() * columns);
-    ghosts.push({ row: randomRow, column: randomColumn });
-    drawElement(ctx, randomRow, randomColumn, 'ghost', cellSize);
+  const enemyShips = enemyShipImages.map(src => {
+    const image = new Image();
+    image.src = src;
+    return image;
+  });
+
+  const playerShipImage = new Image();
+  playerShipImage.src = 'player-ship-image.png'; // Reemplaza 'path/to/player-ship-image.png' con la ruta real de tu imagen de nave del jugador
+
+  function randomXPosition() {
+    return Math.random() * (canvas.width - shipWidth);
   }
 
-  // Mover los fantasmas en intervalos regulares
-  setInterval(moveGhosts, 200);
+  function drawShip(x, y, type) {
+    const image = (type === 'player') ? playerShipImage : enemyShips[0];
+    ctx.drawImage(image, x, y, shipWidth, shipHeight);
+  }
 
-  function moveGhosts() {
-    for (let i = 0; i < ghosts.length; i++) {
-      // Verificar si el fantasma ha alcanzado el límite de pasos
-      if (ghosts[i].stepsRemaining === 0) {
-        // Generar un nuevo objetivo aleatorio
-        ghosts[i].targetRow = Math.floor(Math.random() * rows);
-        ghosts[i].targetColumn = Math.floor(Math.random() * columns);
+  function drawCoin(x, y, collected) {
+    if (!collected) {
+      ctx.drawImage(coinImage, x, y, shipWidth, shipHeight);
+    }
+  }
 
-        // Calcular la dirección hacia el objetivo
-        const rowDifference = ghosts[i].targetRow - ghosts[i].row;
-        const columnDifference = ghosts[i].targetColumn - ghosts[i].column;
+  function drawLife(x, y) {
+    ctx.drawImage(lifeImage, x, y, shipWidth / 2, shipHeight / 2);
+  }
 
-        // Determinar la dirección predominante
-        if (Math.abs(rowDifference) > Math.abs(columnDifference)) {
-          ghosts[i].verticalMovement = rowDifference > 0 ? 1 : -1;
-          ghosts[i].horizontalMovement = 0;
-        } else {
-          ghosts[i].verticalMovement = 0;
-          ghosts[i].horizontalMovement = columnDifference > 0 ? 1 : -1;
-        }
+  function drawBullet(x, y) {
+    ctx.beginPath();
+    ctx.rect(x, y, bulletWidth, bulletHeight);
+    ctx.fillStyle = '#e74c3c';
+    ctx.fill();
+    ctx.closePath();
+  }
+  
+//detecto la colision con objetos
+function collisionDetection(obj1, obj2) {
+  return (
+    obj1.x < obj2.x + shipWidth &&
+    obj1.x + shipWidth > obj2.x &&
+    obj1.y < obj2.y + shipHeight &&
+    obj1.y + shipHeight > obj2.y
+  );
+}
 
-        // Establecer un nuevo límite de pas20os
-        ghosts[i].stepsRemaining = Math.floor(Math.random() * (20 - 5 + 1)) + 5;;
+  function moveObjects() {
+    for (let i = 0; i < objects.length; i++) {
+      const speed = getSpeed(objects[i].type);
+      objects[i].y += speed;
+  
+      if (collisionDetection(playerShip, objects[i])) {
+        handleCollision(objects[i]);
       }
-
-      // Calcular la nueva posición del fantasma
-      const newGhostRow = ghosts[i].row + ghosts[i].verticalMovement;
-      const newGhostColumn = ghosts[i].column + ghosts[i].horizontalMovement;
-
-      // Verificar si la nueva posición está dentro del tablero y es una celda vacía
-      if (
-        newGhostRow >= 0 &&
-        newGhostRow < rows &&
-        newGhostColumn >= 0 &&
-        newGhostColumn < columns &&
-        gameBoard[newGhostRow][newGhostColumn] === 'empty'
-      ) {
-        // Limpiar la posición anterior del fantasma
-        drawElement(ctx, ghosts[i].row, ghosts[i].column, 'empty', cellSize);
-
-        // Actualizar la posición del fantasma
-        ghosts[i].row = newGhostRow;
-        ghosts[i].column = newGhostColumn;
-
-        // Dibujar el fantasma en la nueva posición
-        drawElement(ctx, newGhostRow, newGhostColumn, 'ghost', cellSize);
-
-        // Reducir el contador de pasos restantes
-        ghosts[i].stepsRemaining--;
-      } else {
-        // Si la nueva posición no es válida, reducir el límite de pasos para cambiar de dirección
-        ghosts[i].stepsRemaining = 0;
+  
+      if (objects[i].y > canvas.height) {
+        objects.splice(i, 1);
+        i--;
       }
+    }
+  }
+
+  
+  
+  //controlo la colision miro de que tipo es y llamo a una funcion o a otra
+  function handleCollision(object) {
+    switch (object.type) {
+      case 'coin':
+        handleCoinCollected(object);
+        break;
+      case 'enemy':
+        handleEnemyCollision(object);
+        break;
+      case 'life':
+        handleLifeCollected(object);
+        break;
+      // Agrega más casos según tus necesidades
+    }
+  }
+
+  
+  let lastEnemyCollisionTime = 0;
+  const collisionCooldown = 1000; // 1000 milisegundos (1 segundo)
+
+function handleEnemyCollision(enemy) {
+  // Verificar si ha pasado suficiente tiempo desde la última colisión
+  const currentTime = Date.now();
+  if (currentTime - lastEnemyCollisionTime >= collisionCooldown) {
+    // Restar vidas (ajustar según tus necesidades)
+    lives -= 2;
+    if(lives==0){
+      alert('Game Over');
+
+    }
+    console.log('Vidas restantes:', lives);
+
+    // Actualizar el tiempo de la última colisión
+    lastEnemyCollisionTime = currentTime;
+  }
+}
+
+  function handleLifeCollected(life) {
+    life.collected = true;
+    // Sumar vidas (ajustar según tus necesidades)
+    if (lives < 10 ) lives++;
+    console.log('Vidas restantes:', lives);
+  
+    // Eliminar el objeto solo si aún está presente en la matriz
+    const index = objects.indexOf(life);
+    if (index !== -1) {
+      objects.splice(index, 1);
     }
   }
   
-  document.addEventListener('keydown', function (event) {
-    let moved = false;
-
-    switch (event.key) {
-      case 'ArrowUp':
-        moved = movePacman('up');
-        break;
-      case 'ArrowDown':
-        moved = movePacman('down');
-        break;
-      case 'ArrowLeft':
-        moved = movePacman('left');
-        break;
-      case 'ArrowRight':
-        moved = movePacman('right');
-        break;
+  function handleCoinCollected(coin) {
+    if (!coin.collected) {
+      coin.collected = true;
+      // Incrementar el puntaje
+      score++;
+      console.log('Puntaje:', score);
+  
     }
-      // Verificar si el Pacman se choca con un fantasma
-      if (checkCollisionWithGhosts()) {
-        alert('Game Over. ¡Te chocaste con un fantasma!');
-        resetGame();
-        return;
-    }
-    if (moved) {
-      // Pintar la celda de color naranja solo si está vacía
-      if (gameBoard[pacmanRow][pacmanColumn] === 'empty') {
-        gameBoard[pacmanRow][pacmanColumn] = 'orange';
-      }
+  }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawGameBoard(ctx, gameBoard, cellSize);
-      drawElement(ctx, pacmanRow, pacmanColumn, 'pacman', cellSize);
+  function moveBullets() {
+    for (let i = 0; i < bullets.length; i++) {
+      bullets[i].y -= bulletSpeed;
 
-      for (const ghost of ghosts) {
-        drawElement(ctx, ghost.row, ghost.column, 'ghost', cellSize);
+      if (bullets[i].y < 0) {
+        bullets.splice(i, 1);
+        i--;
       }
     }
-  });
+  }
 
-
-  function checkCollisionWithGhosts() {
-    for (const ghost of ghosts) {
-        if (pacmanRow === ghost.row && pacmanColumn === ghost.column) {
-            return true; // Hay colisión
-        }
+  
+  function draw() {
+    const currentTime = Date.now();
+    const elapsedTimeSinceLastSpawn = currentTime - lastSpawnTime;
+  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+    moveObjects();
+    moveBullets();
+  
+    for (const object of objects) {
+      if (object.type === 'coin') {
+        drawCoin(object.x, object.y, object.collected);
+      } else if (object.type === 'life') {
+        drawLife(object.x, object.y);
+      } else {
+        drawShip(object.x, object.y, object.type);
+      }
     }
-    return false; // No hay colisión
-}
+  
+    for (const bullet of bullets) {
+      drawBullet(bullet.x, bullet.y);
+    }
+  
+    drawShip(playerShip.x, playerShip.y, playerShip.type);
+  
+    // Mostrar el puntaje en algún lugar del lienzo
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('Puntaje: ' + score, 10, 20);
+    drawHearts();
 
-  function movePacman(direction) {
-    let newPacmanRow = pacmanRow;
-    let newPacmanColumn = pacmanColumn;
 
-    switch (direction) {
-      case 'up':
-        if (pacmanRow > 0) newPacmanRow--;
-        break;
-      case 'down':
-        if (pacmanRow < rows - 1) newPacmanRow++;
-        break;
-      case 'left':
-        if (pacmanColumn > 0) newPacmanColumn--;
-        break;
-      case 'right':
-        if (pacmanColumn < columns - 1) newPacmanColumn++;
-        break;
+    for (const bullet of bullets) {
+      drawBullet(bullet.x, bullet.y);
     }
 
-    pacmanRow = newPacmanRow;
-    pacmanColumn = newPacmanColumn;
+    drawShip(playerShip.x, playerShip.y, playerShip.type);
 
-    return true;
+    if (elapsedTimeSinceLastSpawn > 1000) {
+      if (Math.random() < 0.02) {
+        const objectType = getRandomObjectType();
+        objects.push({ x: randomXPosition(), y: 0, type: objectType });
+        lastSpawnTime = currentTime;
+      }
+    }
+
+    movePlayerShip();
+
+    if (spacePressed && !playerShip.firing) {
+      // Solo permitir disparos si no se está disparando actualmente
+      bullets.push({ x: playerShip.x + (shipWidth / 2) - (bulletWidth / 2), y: playerShip.y });
+      playerShip.firing = true;
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+
+
+
+
+  document.addEventListener('keydown', keyDownHandler);
+  document.addEventListener('keyup', keyUpHandler);
+
+  function keyDownHandler(e) {
+    if (e.key === 'Right' || e.key === 'ArrowRight') {
+      rightPressed = true;
+    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+      leftPressed = true;
+    } else if (e.key === 'Up' || e.key === 'ArrowUp') {
+      upPressed = true;
+    } else if (e.key === 'Down' || e.key === 'ArrowDown') {
+      downPressed = true;
+    } else if (e.key === ' ') {
+      spacePressed = true;
+    }
+  }
+
+  function keyUpHandler(e) {
+    if (e.key === 'Right' || e.key === 'ArrowRight') {
+      rightPressed = false;
+    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+      leftPressed = false;
+    } else if (e.key === 'Up' || e.key === 'ArrowUp') {
+      upPressed = false;
+    } else if (e.key === 'Down' || e.key === 'ArrowDown') {
+      downPressed = false;
+    } else if (e.key === ' ') {
+      spacePressed = false;
+      playerShip.firing = false; // Restablecer el estado de disparo cuando se suelta la barra espaciadora
+    }
+  }
+
+  function movePlayerShip() {
+    if (rightPressed && playerShip.x < canvas.width - shipWidth) {
+      playerShip.x += playerShip.speed;
+    } else if (leftPressed && playerShip.x > 0) {
+      playerShip.x -= playerShip.speed;
+    }
+
+    if (upPressed && playerShip.y > 0) {
+      playerShip.y -= playerShip.speed;
+    } else if (downPressed && playerShip.y < canvas.height - shipHeight) {
+      playerShip.y += playerShip.speed;
+    }
+  }
+
+  function getSpeed(type) {
+    switch (type) {
+      case 'coin':
+        return coinSpeed;
+      case 'life':
+        return lifeSpeed;
+      default:
+        return enemyShipSpeed;
+    }
+  }
+
+  function getRandomObjectType() {
+    const randomNumber = Math.random();
+    if (randomNumber < 0.09) {
+      return 'life'; // 2% de probabilidad de ser una vida
+    } else if (randomNumber < 0.52) {
+      return 'coin'; // 50% de probabilidad de ser una moneda
+    } else {
+      return 'enemy'; // 48% de probabilidad de ser una nave enemiga
+    }
+  }
+
+// Asegúrate de tener las rutas correctas a tus imágenes de corazones
+const heartImage = new Image();
+heartImage.src = 'life-image.png';
+  draw();
+  
+
+  function drawHearts() {
+    const heartSize = 20; // Tamaño del corazón
+    const spacing = 5; // Espaciado entre los corazones
+    const startX = 100; // Posición inicial en X para los corazones
+
+    for (let i = 0; i < 10; i++) {
+      const heartX = startX + i * (heartSize + spacing);
+      const heartY = 10; // Posición en Y para los corazones
+
+      // Dibujar corazón lleno o vacío según el número de vidas
+      if (i * 2 < lives) {
+        // Corazón lleno
+        ctx.drawImage(heartImage, heartX, heartY, heartSize, heartSize);
+      }
+    }
   }
 });
-
-function createGameBoard(rows, columns) {
-  const gameBoard = [];
-  for (let i = 0; i < rows; i++) {
-    const row = [];
-    for (let j = 0; j < columns; j++) {
-      row.push('empty');
-    }
-    gameBoard.push(row);
-  }
-  return gameBoard;
-}
-
-function drawGameBoard(ctx, gameBoard, cellSize) {
-  for (let i = 0; i < gameBoard.length; i++) {
-    for (let j = 0; j < gameBoard[i].length; j++) {
-      const x = j * cellSize;
-      const y = i * cellSize;
-      ctx.fillStyle = getColor(gameBoard[i][j]);
-      ctx.fillRect(x, y, cellSize, cellSize);
-      ctx.strokeRect(x, y, cellSize, cellSize);
-    }
-  }
-}
-
-function drawElement(ctx, row, column, element, cellSize) {
-  const x = column * cellSize;
-  const y = row * cellSize;
-
-  switch (element) {
-    case 'pacman':
-      ctx.fillStyle = '#ffeb3b';
-      ctx.beginPath();
-      ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize / 2, 0.2 * Math.PI, 1.8 * Math.PI);
-      ctx.lineTo(x + cellSize / 2, y + cellSize / 2);
-      ctx.closePath();
-      ctx.fill();
-      break;
-      case 'ghost':
-        const ghostImage = new Image();
-        ghostImage.src = 'ghost.png'; // Reemplaza con la ruta correcta de tu imagen
-        ctx.drawImage(ghostImage, x, y, cellSize, cellSize);
-      break;
-    case 'empty':
-      ctx.clearRect(x, y, cellSize, cellSize);
-      break;
-  }
-}
-
-function getColor(cell) {
-  switch (cell) {
-    case 'empty':
-      return '#ffffff';
-    case 'orange':
-      return '#ff9800';
-    default:
-      return '#ffffff';
-  }
-}
