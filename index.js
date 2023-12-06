@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
 
-  const shipWidth = 40;
-  const shipHeight = 20;
+  const shipWidth = 20;
+  const shipHeight = 30;
   const bulletWidth = 5;
   const bulletHeight = 10;
-  const playerShipSpeed = 5;
-  const enemyShipSpeed = 1;
+  const playerShipSpeed = 3;
+  const enemyShipSpeed = 0.6;
   const coinSpeed = 0.5;
   const lifeSpeed = 0.3;
   const bulletSpeed = 5;
@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
   let lives = 10;
   let score = 0;
 
+  const bulletCollisions = [];
+
+
   const playerShip = {
     x: (canvas.width - shipWidth) / 2,
     y: canvas.height - shipHeight,
@@ -33,34 +36,87 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   const coinImage = new Image();
-  coinImage.src = 'coin-image.webp'; // Reemplaza 'path/to/coin-image.png' con la ruta real de tu imagen de moneda
-
+  coinImage.onload = startGame; // Llama a startGame cuando la imagen de la moneda se carga
+  coinImage.src = 'coin-image.webp';
+  
   const lifeImage = new Image();
-  lifeImage.src = 'life-image.png'; // Reemplaza 'path/to/life-image.png' con la ruta real de tu imagen de vida
-
+  lifeImage.onload = startGame; // Llama a startGame cuando la imagen de la vida se carga
+  lifeImage.src = 'life-image.png';
+  
   const enemyShipImages = [
     'enemy-ship-type-1.png',
     'enemy-ship-type-2.png',
     'enemy-ship-type-3.png'
   ];
-
+  
   const enemyShips = enemyShipImages.map(src => {
     const image = new Image();
+    image.onload = startGame; // Llama a startGame cuando una imagen de nave enemiga se carga
     image.src = src;
     return image;
   });
-
+  
   const playerShipImage = new Image();
-  playerShipImage.src = 'player-ship-image.png'; // Reemplaza 'path/to/player-ship-image.png' con la ruta real de tu imagen de nave del jugador
-
-  function randomXPosition() {
-    return Math.random() * (canvas.width - shipWidth);
+  playerShipImage.onload = startGame; // Llama a startGame cuando la imagen de la nave del jugador se carga
+  playerShipImage.src = 'player-ship-image.png';
+  
+  let imagesLoaded = 0;
+  
+  function startGame() {
+    imagesLoaded++;
+    if (imagesLoaded === 5) {
+      // Todas las imágenes están cargadas, inicia el juego
+      draw();
+    }
   }
+  function randomXPosition(type) {
+    const maxWidth = canvas.width - shipWidth;
+    
+    // Dependiendo del tipo de nave, ajusta la posición inicial
+    if (type === 'player') {
+      return Math.random() * maxWidth;
+    } else if (type.startsWith('enemy')) {
+      // Para las naves enemigas, garantiza que la nueva nave no se superponga con otras
+      let x;
+      do {
+        x = Math.random() * maxWidth;
+      } while (objects.some(obj => obj.type.startsWith('enemy') && Math.abs(obj.x - x) < shipWidth));
+      
+      return x;
+    } else {
+      return Math.random() * maxWidth;
+    }
+  }
+  
+  
 
-  function drawShip(x, y, type) {
-    const image = (type === 'player') ? playerShipImage : enemyShips[0];
+  function drawShip(x, y, type, subtype) {
+    let image;
+  
+    if (type === 'player') {
+      image = playerShipImage;
+    } else if (type === 'enemy') {
+      // Obtén el índice de la imagen de la nave enemiga según el subtipo
+      const enemyIndex = getEnemyImageIndex(subtype);
+      image = enemyShips[enemyIndex];
+    }
+  
     ctx.drawImage(image, x, y, shipWidth, shipHeight);
   }
+  
+  function getEnemyImageIndex(subtype) {
+    switch (subtype) {
+      case 'enemy-ship-type-1':
+        return 0;
+      case 'enemy-ship-type-2':
+        return 1;
+      case 'enemy-ship-type-3':
+        return 2;
+      default:
+        return 0; // Cambia el valor predeterminado según tus necesidades
+    }
+  }
+  
 
   function drawCoin(x, y, collected) {
     if (!collected) {
@@ -90,21 +146,22 @@ function collisionDetection(obj1, obj2) {
   );
 }
 
-  function moveObjects() {
-    for (let i = 0; i < objects.length; i++) {
-      const speed = getSpeed(objects[i].type);
-      objects[i].y += speed;
-  
-      if (collisionDetection(playerShip, objects[i])) {
-        handleCollision(objects[i]);
-      }
-  
-      if (objects[i].y > canvas.height) {
-        objects.splice(i, 1);
-        i--;
-      }
+function moveObjects() {
+  for (let i = 0; i < objects.length; i++) {
+    const speed = getSpeed(objects[i].type);
+    objects[i].y += speed;
+
+    if (collisionDetection(playerShip, objects[i])) {
+      handleCollision(objects[i]);
+    }
+
+    if (objects[i] && objects[i].y > canvas.height) {
+      objects.splice(i, 1);
+      i--;
     }
   }
+}
+
 
   
   
@@ -178,12 +235,28 @@ function handleEnemyCollision(enemy) {
       }
     }
   }
+function handleBulletCollision(bullet) {
+  // Verifica si este proyectil ya ha colisionado previamente con alguna nave enemiga
+  if (!bulletCollisions.includes(bullet)) {
+    for (let i = 0; i < objects.length; i++) {
+      const object = objects[i];
+      if (object.type === 'enemy' && collisionDetection(bullet, object)) {
+        // Incrementa aquí la cantidad de impactos o realiza la lógica deseada
+        console.log('impacto');
 
+        // Agrega este proyectil al registro de colisiones
+        bulletCollisions.push(bullet);
+        break;
+      }
+    }
+  }
+}
   
   function draw() {
     const currentTime = Date.now();
     const elapsedTimeSinceLastSpawn = currentTime - lastSpawnTime;
   
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   
     moveObjects();
@@ -195,12 +268,13 @@ function handleEnemyCollision(enemy) {
       } else if (object.type === 'life') {
         drawLife(object.x, object.y);
       } else {
-        drawShip(object.x, object.y, object.type);
+        drawShip(object.x, object.y, object.type, object.subtype);
       }
     }
   
     for (const bullet of bullets) {
       drawBullet(bullet.x, bullet.y);
+      handleBulletCollision(bullet);  // Agregar esta línea para manejar las colisiones de los proyectiles
     }
   
     drawShip(playerShip.x, playerShip.y, playerShip.type);
@@ -221,10 +295,12 @@ function handleEnemyCollision(enemy) {
     if (elapsedTimeSinceLastSpawn > 1000) {
       if (Math.random() < 0.02) {
         const objectType = getRandomObjectType();
-        objects.push({ x: randomXPosition(), y: 0, type: objectType });
+        const objectSubtype = objectType === 'enemy' ? getRandomEnemyType() : null;
+        objects.push({ x: randomXPosition(objectType), y: 0, type: objectType, subtype: objectSubtype });
         lastSpawnTime = currentTime;
       }
     }
+    
 
     movePlayerShip();
 
@@ -309,6 +385,19 @@ function handleEnemyCollision(enemy) {
     }
   }
 
+  function getRandomEnemyType() {
+    const randomNumber = Math.random();
+    if (randomNumber < 0.33) {
+      return 'enemy-ship-type-1';
+    } else if (randomNumber < 0.66) {
+      return 'enemy-ship-type-2';
+    } else {
+      return 'enemy-ship-type-3';
+    }
+  }
+  
+  
+
 // Asegúrate de tener las rutas correctas a tus imágenes de corazones
 const heartImage = new Image();
 heartImage.src = 'life-image.png';
@@ -325,7 +414,7 @@ heartImage.src = 'life-image.png';
       const heartY = 10; // Posición en Y para los corazones
 
       // Dibujar corazón lleno o vacío según el número de vidas
-      if (i * 2 < lives) {
+      if (i < lives) {
         // Corazón lleno
         ctx.drawImage(heartImage, heartX, heartY, heartSize, heartSize);
       }
