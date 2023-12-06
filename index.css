@@ -1,5 +1,10 @@
 canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-  }
+  display: block;
+  border: 1px solid #ccc;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

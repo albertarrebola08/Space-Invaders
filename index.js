@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   const objectDimensions = {
-    playerShip: { width: 50, height: 50 },
+    playerShip: { width: 50, height: 70 },
     enemy: { width: 50, height: 50 },
     coin: { width: 15, height: 15 },
     life: { width: 20, height: 20 },
-    bullet: { width: 5, height: 10 }
+    bullet: { width: 5, height: 10 },
+    explosion: {width: 80, height: 80}
 };
 
 
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const enemyShipWidth = objectDimensions.enemy.width;
   const enemyShipHeight = objectDimensions.enemy.height;
+  
   
   const coinWidth = objectDimensions.coin.width;
   const coinHeight = objectDimensions.coin.height;
@@ -271,26 +273,73 @@ function handleEnemyCollision(enemy) {
       }
     }
   }
-function handleBulletCollision(bullet) {
-  // Verifica si este proyectil ya ha colisionado previamente con alguna nave enemiga
-  if (!bulletCollisions.includes(bullet)) {
-    for (let i = 0; i < objects.length; i++) {
-      const object = objects[i];
-      if (object.type === 'enemy' && collisionDetection(bullet, object)) {
-        // Incrementa aquí la cantidad de impactos o realiza la lógica deseada
-        console.log('impacto');
 
-        // Agrega este proyectil al registro de colisiones
-        bulletCollisions.push(bullet);
-        break;
+  const enemyShipStats = {
+    'enemy-ship-type-1': { shotsToDestroy: 3, shotsReceived: 0 },
+    'enemy-ship-type-2': { shotsToDestroy: 5, shotsReceived: 0 },
+    'enemy-ship-type-3': { shotsToDestroy: 6, shotsReceived: 0 }
+  };
+
+  const explosionImage = new Image();
+  explosionImage.onload = startGame; // O cualquier otra lógica que desees
+  explosionImage.src = 'explosion-img.png'; // Ajusta la ruta según tu proyecto
+
+  
+
+  function handleBulletCollision(bullet) {
+    // Verifica si este proyectil ya ha colisionado previamente con alguna nave enemiga
+    if (!bulletCollisions.includes(bullet)) {
+      for (let i = 0; i < objects.length; i++) {
+        const object = objects[i];
+        if (object.type === 'enemy' && collisionDetection(bullet, object)) {
+          // Incrementa aquí la cantidad de impactos o realiza la lógica deseada
+          console.log('Impacto en nave enemiga');
+  
+          // Incrementa el contador de disparos recibidos para este tipo de nave
+          enemyShipStats[object.subtype].shotsReceived++;
+  
+          // Verifica si la nave enemiga ha sido destruida
+          if (enemyShipStats[object.subtype].shotsReceived >= enemyShipStats[object.subtype].shotsToDestroy) {
+            console.log(`Nave ${object.subtype} destruida`);
+  
+            // Agrega un objeto de tipo 'explosion' con la posición de la nave
+            objects.push({
+              x: object.x,
+              y: object.y,
+              type: 'explosion',
+              image: explosionImage
+            });
+  
+            // Elimina la nave de la matriz de objetos solo si aún está presente
+            const index = objects.indexOf(object);
+            if (index !== -1) {
+              objects.splice(index, 1);
+  
+              // Restablece el contador de disparos recibidos para este tipo de nave
+              enemyShipStats[object.subtype].shotsReceived = 0;
+              console.log(`Nave ${object.subtype} eliminada después de la explosión`);
+            }
+          }
+  
+          // Agrega este proyectil al registro de colisiones
+          bulletCollisions.push(bullet);
+          break;
+        }
       }
     }
   }
-}
+  
+  
+  
+  
   
 function draw() {
   const currentTime = Date.now();
   const elapsedTimeSinceLastSpawn = currentTime - lastSpawnTime;
+
+  const explosionWidth = objectDimensions.explosion.width;
+  const explosionHeight = objectDimensions.explosion.height;
+
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -298,7 +347,17 @@ function draw() {
   moveBullets();
 
   for (const object of objects) {
-    if (object.type === 'coin') {
+    if (object.destroyed) continue;
+
+    if (object.type === 'explosion') {
+      // Dibuja la imagen de la explosión
+      ctx.drawImage(object.image, object.x, object.y, explosionWidth, explosionHeight);
+    
+     // Elimina la explosión después de 500 milisegundos
+     setTimeout(() => {
+      object.destroyed = true;
+    }, 500);
+    } else if (object.type === 'coin') {
       drawCoin(object.x, object.y, object.collected);
     } else if (object.type === 'life') {
       drawLife(object.x, object.y);
