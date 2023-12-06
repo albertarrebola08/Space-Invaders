@@ -3,10 +3,33 @@ document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
 
-  const shipWidth = 20;
-  const shipHeight = 30;
-  const bulletWidth = 5;
-  const bulletHeight = 10;
+
+  const objectDimensions = {
+    playerShip: { width: 50, height: 50 },
+    enemy: { width: 50, height: 50 },
+    coin: { width: 15, height: 15 },
+    life: { width: 20, height: 20 },
+    bullet: { width: 5, height: 10 }
+};
+
+
+
+  
+  const playerShipWidth = objectDimensions.playerShip.width;
+  const playerShipHeight = objectDimensions.playerShip.height;
+  
+  const enemyShipWidth = objectDimensions.enemy.width;
+  const enemyShipHeight = objectDimensions.enemy.height;
+  
+  const coinWidth = objectDimensions.coin.width;
+  const coinHeight = objectDimensions.coin.height;
+  
+  const lifeWidth = objectDimensions.life.width;
+  const lifeHeight = objectDimensions.life.height;
+  
+  const bulletWidth = objectDimensions.bullet.width;
+  const bulletHeight = objectDimensions.bullet.height;
+  
   const playerShipSpeed = 3;
   const enemyShipSpeed = 0.6;
   const coinSpeed = 0.5;
@@ -28,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   const playerShip = {
-    x: (canvas.width - shipWidth) / 2,
-    y: canvas.height - shipHeight,
+    x: (canvas.width - objectDimensions.playerShip.width) / 2,
+    y: canvas.height - objectDimensions.playerShip.height,
     speed: playerShipSpeed,
     type: 'player',
     firing: false
@@ -70,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   function randomXPosition(type) {
-    const maxWidth = canvas.width - shipWidth;
+    const maxWidth = canvas.width - objectDimensions.playerShip.width;
     
     // Dependiendo del tipo de nave, ajusta la posición inicial
     if (type === 'player') {
@@ -80,16 +103,13 @@ document.addEventListener('DOMContentLoaded', function () {
       let x;
       do {
         x = Math.random() * maxWidth;
-      } while (objects.some(obj => obj.type.startsWith('enemy') && Math.abs(obj.x - x) < shipWidth));
+      } while (objects.some(obj => obj.type.startsWith('enemy') && Math.abs(obj.x - x) < objectDimensions.playerShip.width));
       
       return x;
     } else {
       return Math.random() * maxWidth;
     }
   }
-  
-  
-
   function drawShip(x, y, type, subtype) {
     let image;
   
@@ -101,8 +121,40 @@ document.addEventListener('DOMContentLoaded', function () {
       image = enemyShips[enemyIndex];
     }
   
-    ctx.drawImage(image, x, y, shipWidth, shipHeight);
+    const width =
+      type === 'coin' ? coinWidth :
+      type === 'life' ? lifeWidth :
+      type === 'enemy' ? enemyShipWidth :
+      playerShipWidth;
+  const height =
+      type === 'coin' ? coinHeight :
+      type === 'life' ? lifeHeight :
+      type === 'enemy' ? enemyShipHeight :
+      playerShipHeight;
+
+  
+    ctx.drawImage(image, x, y, width, height);
   }
+  
+  function drawCoin(x, y, collected) {
+    if (!collected) {
+      ctx.drawImage(coinImage, x, y, coinWidth, coinHeight);
+    }
+  }
+  
+  function drawLife(x, y) {
+    ctx.drawImage(lifeImage, x, y, lifeWidth, lifeHeight);
+  }
+  
+  function drawBullet(x, y) {
+    ctx.beginPath();
+    ctx.rect(x, y, bulletWidth, bulletHeight);
+    ctx.fillStyle = '#e74c3c';
+    ctx.fill();
+    ctx.closePath();
+  }
+  
+
   
   function getEnemyImageIndex(subtype) {
     switch (subtype) {
@@ -118,31 +170,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   
 
-  function drawCoin(x, y, collected) {
-    if (!collected) {
-      ctx.drawImage(coinImage, x, y, shipWidth, shipHeight);
-    }
-  }
-
-  function drawLife(x, y) {
-    ctx.drawImage(lifeImage, x, y, shipWidth / 2, shipHeight / 2);
-  }
-
-  function drawBullet(x, y) {
-    ctx.beginPath();
-    ctx.rect(x, y, bulletWidth, bulletHeight);
-    ctx.fillStyle = '#e74c3c';
-    ctx.fill();
-    ctx.closePath();
-  }
+  
   
 //detecto la colision con objetos
 function collisionDetection(obj1, obj2) {
   return (
-    obj1.x < obj2.x + shipWidth &&
-    obj1.x + shipWidth > obj2.x &&
-    obj1.y < obj2.y + shipHeight &&
-    obj1.y + shipHeight > obj2.y
+    obj1.x < obj2.x + objectDimensions.playerShip.width &&
+    obj1.x + objectDimensions.playerShip.width > obj2.x &&
+    obj1.y < obj2.y + objectDimensions.playerShip.height &&
+    obj1.y + objectDimensions.playerShip.height > obj2.y
   );
 }
 
@@ -252,66 +288,72 @@ function handleBulletCollision(bullet) {
   }
 }
   
-  function draw() {
-    const currentTime = Date.now();
-    const elapsedTimeSinceLastSpawn = currentTime - lastSpawnTime;
-  
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-    moveObjects();
-    moveBullets();
-  
-    for (const object of objects) {
-      if (object.type === 'coin') {
-        drawCoin(object.x, object.y, object.collected);
-      } else if (object.type === 'life') {
-        drawLife(object.x, object.y);
-      } else {
-        drawShip(object.x, object.y, object.type, object.subtype);
-      }
+function draw() {
+  const currentTime = Date.now();
+  const elapsedTimeSinceLastSpawn = currentTime - lastSpawnTime;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  moveObjects();
+  moveBullets();
+
+  for (const object of objects) {
+    if (object.type === 'coin') {
+      drawCoin(object.x, object.y, object.collected);
+    } else if (object.type === 'life') {
+      drawLife(object.x, object.y);
+    } else {
+      const dimensions = objectDimensions[object.type] || { width: playerShipWidth, height: playerShipHeight };
+      drawShip(object.x, object.y, object.type, object.subtype, dimensions.width, dimensions.height);
     }
-  
-    for (const bullet of bullets) {
-      drawBullet(bullet.x, bullet.y);
-      handleBulletCollision(bullet);  // Agregar esta línea para manejar las colisiones de los proyectiles
-    }
-  
-    drawShip(playerShip.x, playerShip.y, playerShip.type);
-  
-    // Mostrar el puntaje en algún lugar del lienzo
-    ctx.font = '16px Arial';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('Puntaje: ' + score, 10, 20);
-    drawHearts();
-
-
-    for (const bullet of bullets) {
-      drawBullet(bullet.x, bullet.y);
-    }
-
-    drawShip(playerShip.x, playerShip.y, playerShip.type);
-
-    if (elapsedTimeSinceLastSpawn > 1000) {
-      if (Math.random() < 0.02) {
-        const objectType = getRandomObjectType();
-        const objectSubtype = objectType === 'enemy' ? getRandomEnemyType() : null;
-        objects.push({ x: randomXPosition(objectType), y: 0, type: objectType, subtype: objectSubtype });
-        lastSpawnTime = currentTime;
-      }
-    }
-    
-
-    movePlayerShip();
-
-    if (spacePressed && !playerShip.firing) {
-      // Solo permitir disparos si no se está disparando actualmente
-      bullets.push({ x: playerShip.x + (shipWidth / 2) - (bulletWidth / 2), y: playerShip.y });
-      playerShip.firing = true;
-    }
-
-    requestAnimationFrame(draw);
   }
+
+  for (const bullet of bullets) {
+    drawBullet(bullet.x, bullet.y);
+    handleBulletCollision(bullet);
+  }
+
+  drawShip(playerShip.x, playerShip.y, playerShip.type);
+
+  ctx.font = '16px Arial';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('Puntaje: ' + score, 10, 20);
+  drawHearts();
+
+  for (const bullet of bullets) {
+    drawBullet(bullet.x, bullet.y);
+  }
+
+  drawShip(playerShip.x, playerShip.y, playerShip.type);
+
+  if (elapsedTimeSinceLastSpawn > 1000) {
+    if (Math.random() < 0.02) {
+        const objectType = getRandomObjectType();
+
+        // Verificar si objectType es una clave válida en objectDimensions
+        if (objectType in objectDimensions) {
+            const objectSubtype = objectType === 'enemy' ? getRandomEnemyType() : null;
+            const { width, height } = objectDimensions[objectType];
+            objects.push({ x: randomXPosition(objectType, width), y: 0, type: objectType, subtype: objectSubtype, width, height });
+            lastSpawnTime = currentTime;
+        } else {
+            // Log o manejar el caso en que objectType no sea válido
+            console.error('objectType no válido:', objectType);
+        }
+    }
+}
+
+  movePlayerShip();
+
+  if (spacePressed && !playerShip.firing) {
+    bullets.push({ x: playerShip.x + (playerShipWidth / 2) - (bulletWidth / 2), y: playerShip.y });
+    playerShip.firing = true;
+  }
+
+  requestAnimationFrame(draw);
+}
+
+
 
 
 
@@ -350,7 +392,7 @@ function handleBulletCollision(bullet) {
   }
 
   function movePlayerShip() {
-    if (rightPressed && playerShip.x < canvas.width - shipWidth) {
+    if (rightPressed && playerShip.x < canvas.width - objectDimensions.playerShip.width) {
       playerShip.x += playerShip.speed;
     } else if (leftPressed && playerShip.x > 0) {
       playerShip.x -= playerShip.speed;
@@ -358,7 +400,7 @@ function handleBulletCollision(bullet) {
 
     if (upPressed && playerShip.y > 0) {
       playerShip.y -= playerShip.speed;
-    } else if (downPressed && playerShip.y < canvas.height - shipHeight) {
+    } else if (downPressed && playerShip.y < canvas.height - objectDimensions.playerShip.height) {
       playerShip.y += playerShip.speed;
     }
   }
@@ -384,6 +426,7 @@ function handleBulletCollision(bullet) {
       return 'enemy'; // 48% de probabilidad de ser una nave enemiga
     }
   }
+  
 
   function getRandomEnemyType() {
     const randomNumber = Math.random();
