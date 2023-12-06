@@ -1,4 +1,4 @@
-# Pacman-Game
+# Space Invaders
 ## Projecte desenvolupat per a l'assignatura de Intel·ligència Artifical a la Comunicació.
 
 ### Tecnologies
