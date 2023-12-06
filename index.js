@@ -32,14 +32,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const bulletWidth = objectDimensions.bullet.width;
   const bulletHeight = objectDimensions.bullet.height;
   
-  const playerShipSpeed = 3;
+  const playerShipSpeed = 4;
   const enemyShipSpeed = 0.6;
   const coinSpeed = 0.5;
   const lifeSpeed = 0.3;
   const bulletSpeed = 5;
   const objects = [];
   const bullets = [];
-  const ships = [];
   let rightPressed = false;
   let leftPressed = false;
   let upPressed = false;
