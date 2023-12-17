@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono&display=swap" rel="stylesheet">
+    <title>Mi Juego de Naves Espaciales</title>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <!-- 1. Contenido de la portada, por ejemplo, el título y una imagen -->
+            <h1>Galactic Assault I.A</h1>
+        </div>
+        <div class="main">
+
+            <div id="instrucciones">
+                <!-- 2. Instrucciones cortas -->
+                <h2>Instrucciones</h2>
+                <p>Controla la nave con las teclas de dirección y dispara con la barra espaciadora.</p>
+            </div>
+
+            <div id="seleccion">
+                <!-- 3. Selección de modelo de nave en un contenedor rectangular -->
+                <div id="modelosNaveContainer">
+                    <h2>Selecciona tu Nave</h2>
+                    <div id="modelosNave" class="filaModelos">
+                        <div class="modeloNave" onclick="seleccionarModelo('nave1', this)">
+                            <img src="player1.png" alt="Nave 1" width="100" height="100">
+                        </div>
+                        <div class="modeloNave" onclick="seleccionarModelo('nave2', this)">
+                            <img src="player2.png" alt="Nave 2" width="100" height="100">
+                        </div>
+                        <div class="modeloNave" onclick="seleccionarModelo('nave3', this)">
+                            <img src="player3.png" alt="Nave 3" width="100" height="100">
+                        </div>
+                        <div class="modeloNave" onclick="seleccionarModelo('nave4', this)">
+                            <img src="player4.png" alt="Nave 4" width="100" height="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dificultad">
+                <!-- 4. Selección de Dificultad -->
+                <h2>Selecciona la Dificultad</h2>
+                <select id="selectDificultad">
+                    <option value="facil">Fácil</option>
+                    <option value="intermedio">Intermedio</option>
+                    <option value="avanzado">Avanzado</option>
+                </select>
+            </div>
+
+            <div id="inicio">
+                <!-- Botón para iniciar el juego -->
+                <button onclick="iniciarJuego()">Iniciar Juego</button>
+            </div>
+        </div>
+    </div>
+    <div id="informacion-adicional">
+        <h2>Información Adicional</h2>
+        <p>Somos 5 estudiantes de Comunicación Interactiva que han creado este juego con ChatGPT y otras herramientas de Inteligencia Artificial. Haz click para descargar nuestro informe.</p>
+        <a href="ruta/del/informe.pdf" download="Informe Space Invaders">Descargar Informe</a>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

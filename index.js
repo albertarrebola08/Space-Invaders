@@ -1,27 +1,30 @@
-
 document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
-
+//dimensiones del canvas
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight
 
   const objectDimensions = {
-    playerShip: { width: 50, height: 70 },
-    enemy: { width: 50, height: 50 },
-    coin: { width: 15, height: 15 },
-    life: { width: 20, height: 20 },
+    playerShip: { width: 100, height: 100 },
+    enemy: { width: 70, height: 70 },
+    coin: { width: 40, height: 40 },
+    life: { width: 40, height: 40   },
     bullet: { width: 5, height: 10 },
     explosion: {width: 80, height: 80}
 };
 
-
-
-  
+//importo sonidos
+   const lifeSound = new Audio('life.mp3');
+   const coinSound = new Audio('coin.mp3');
+   const explosionSound = new Audio('explosion.mp3');
+   const shootSound = new Audio('shoot.mp3');
+//dimensiones de los objetos
   const playerShipWidth = objectDimensions.playerShip.width;
   const playerShipHeight = objectDimensions.playerShip.height;
   
   const enemyShipWidth = objectDimensions.enemy.width;
   const enemyShipHeight = objectDimensions.enemy.height;
-  
   
   const coinWidth = objectDimensions.coin.width;
   const coinHeight = objectDimensions.coin.height;
@@ -32,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const bulletWidth = objectDimensions.bullet.width;
   const bulletHeight = objectDimensions.bullet.height;
   
+  //configuracion del funcionamiento del juego
   const playerShipSpeed = 4;
   const enemyShipSpeed = 0.6;
   const coinSpeed = 0.5;
@@ -47,9 +51,24 @@ document.addEventListener('DOMContentLoaded', function () {
   let lastSpawnTime = 0;
   let lives = 10;
   let score = 0;
-
   const bulletCollisions = [];
 
+  //dsf
+  let defenseTroops = 50; // Inicializar con el valor correspondiente a la dificultad 1
+  let difficulty = 3     ; // Puedes cambiar esto según la dificultad del juego
+
+  switch (difficulty) {
+    case 1:
+      defenseTroops = 50;
+      break;
+    case 2:
+      defenseTroops = 30;
+      break;
+    case 3:
+      defenseTroops = 15;
+      break;
+    // Añade más casos según sea necesario
+  }
 
   const playerShip = {
     x: (canvas.width - objectDimensions.playerShip.width) / 2,
@@ -61,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const coinImage = new Image();
   coinImage.onload = startGame; // Llama a startGame cuando la imagen de la moneda se carga
-  coinImage.src = 'coin-image.webp';
+  coinImage.src = 'coin-image.png';
   
   const lifeImage = new Image();
   lifeImage.onload = startGame; // Llama a startGame cuando la imagen de la vida se carga
@@ -82,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const playerShipImage = new Image();
   playerShipImage.onload = startGame; // Llama a startGame cuando la imagen de la nave del jugador se carga
-  playerShipImage.src = 'player-ship-image.png';
+  playerShipImage.src = 'player2.png';
   
   let imagesLoaded = 0;
   
@@ -184,7 +203,7 @@ function collisionDetection(obj1, obj2) {
 }
 
 function moveObjects() {
-  for (let i = 0; i < objects.length; i++) {
+  for (let i = objects.length - 1; i >= 0; i--) {
     const speed = getSpeed(objects[i].type);
     objects[i].y += speed;
 
@@ -193,11 +212,22 @@ function moveObjects() {
     }
 
     if (objects[i] && objects[i].y > canvas.height) {
+      // Verifica si es una nave enemiga para disminuir las tropas
+      if (objects[i].type === 'enemy') {
+        // Disminuir el contador de tropas según la dificultad
+        defenseTroops--;
+
+        // Log o mensaje para informar sobre la disminución de tropas
+        console.log('Tropas de defensa restantes:', defenseTroops);
+      }
+
+      // Elimina el objeto de la matriz
       objects.splice(i, 1);
-      i--;
     }
   }
 }
+
+
 
 
   
@@ -227,23 +257,29 @@ function handleEnemyCollision(enemy) {
   const currentTime = Date.now();
   if (currentTime - lastEnemyCollisionTime >= collisionCooldown) {
     // Restar vidas (ajustar según tus necesidades)
-    lives -= 2;
-    if(lives==0){
-      alert('Game Over');
-
+    lives -= 1;
+    if (lives <= 0) {
+      alert('Game over - No tienes más vidas !!!')
+        resetGame();
     }
-    console.log('Vidas restantes:', lives);
+    
 
     // Actualizar el tiempo de la última colisión
     lastEnemyCollisionTime = currentTime;
+}
   }
+function resetGame() {
+  // Aquí colocas la lógica para reiniciar tu juego
+  // Puedes recargar la página, restablecer variables, etc.
+  location.reload(); // Recargar la página por ejemplo
 }
 
   function handleLifeCollected(life) {
     life.collected = true;
     // Sumar vidas (ajustar según tus necesidades)
     if (lives < 10 ) lives++;
-    console.log('Vidas restantes:', lives);
+    lifeSound.play();
+
   
     // Eliminar el objeto solo si aún está presente en la matriz
     const index = objects.indexOf(life);
@@ -257,6 +293,7 @@ function handleEnemyCollision(enemy) {
       coin.collected = true;
       // Incrementar el puntaje
       score++;
+      coinSound.play()
       console.log('Puntaje:', score);
   
     }
@@ -308,7 +345,7 @@ function handleEnemyCollision(enemy) {
               type: 'explosion',
               image: explosionImage
             });
-  
+            explosionSound.play();   
             // Elimina la nave de la matriz de objetos solo si aún está presente
             const index = objects.indexOf(object);
             if (index !== -1) {
@@ -375,7 +412,8 @@ function draw() {
 
   ctx.font = '16px Arial';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText('Puntaje: ' + score, 10, 20);
+  ctx.fillText('Puntuación: ' + score, 10, 20);
+  ctx.fillText('Tropas de defensa: ' + defenseTroops, 10, 50)
   drawHearts();
 
   for (const bullet of bullets) {
@@ -406,6 +444,7 @@ function draw() {
   if (spacePressed && !playerShip.firing) {
     bullets.push({ x: playerShip.x + (playerShipWidth / 2) - (bulletWidth / 2), y: playerShip.y });
     playerShip.firing = true;
+    shootSound.play();
   }
 
   requestAnimationFrame(draw);
@@ -508,7 +547,7 @@ heartImage.src = 'life-image.png';
   function drawHearts() {
     const heartSize = 20; // Tamaño del corazón
     const spacing = 5; // Espaciado entre los corazones
-    const startX = 100; // Posición inicial en X para los corazones
+    const startX = 150; // Posición inicial en X para los corazones
 
     for (let i = 0; i < 10; i++) {
       const heartX = startX + i * (heartSize + spacing);

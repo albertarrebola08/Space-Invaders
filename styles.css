@@ -1,0 +1,112 @@
+/* styles.css */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+}
+
+#portada {
+    text-align: center;
+    padding: 50px;
+}
+
+#instrucciones,
+#seleccion,
+#inicio {
+    text-align: center;
+    padding: 20px;
+}
+
+h1{
+    font-family: 'Press Start 2P';   
+}
+.header{
+    display: flex;
+    justify-content: center;
+}
+
+.main{
+    background-image: url('portada.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    font-family: 'Space Mono';
+}
+
+/* Estilo para el contenedor rectangular con borde redondeado y fondo transparente */
+#modelosNaveContainer {
+    display: flex;
+    border: 2px solid rgba(255, 255, 255, 0.5); /* Borde redondeado con color blanco y opacidad 50% */
+    border-radius: 10px; /* Ajusta el radio de los bordes según tu preferencia */
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo transparente con opacidad 50% */
+    padding: 10px; /* Ajusta el espacio interno según tu preferencia */
+    margin-bottom: 20px; /* Ajusta el margen inferior según tu preferencia */
+}
+
+/* Ajustes adicionales para las naves dentro del contenedor */
+.filaModelos {
+    display: flex;
+    justify-content: space-between;
+}
+
+.modeloNave {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border 0.3s ease-in-out;
+    width: 100px; /* Nuevo ajuste: Ancho máximo de cada modelo */
+    height: 100px; /* Nuevo ajuste: Altura máxima de cada modelo */
+    margin: 10px; /* Nuevo ajuste: Espaciado entre modelos */
+}
+#modelosNaveContainer{
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+.modeloNave:hover {
+    border-color: #fff;
+}
+
+.modeloNave.seleccionado {
+    border-color: #00ff00; /* Cambia el color de resaltado según tu preferencia */
+}
+
+#dificultad {
+    text-align: center;
+    padding: 20px;
+    position: relative;
+
+}
+
+#selectDificultad {
+    padding: 10px;
+    font-size: 16px;
+}
+
+#informacion-adicional {
+    text-align: center;
+    padding: 20px;
+    background-color: slategrey;
+    border-radius: 10px;
+    
+    font-size: 14px;
+    position: relative;
+    margin: 0 auto; /* Para centrar horizontalmente */
+    max-width: 600px; /* Ajusta el ancho máximo según tu preferencia */
+    margin-bottom: 20px;
+}
+
+#informacion-adicional a {
+    display: block; /* Hace que el enlace ocupe todo el ancho disponible */
+    padding: 10px;
+    margin-top: 10px; /* Ajusta el margen superior según tu preferencia */
+    background-color: #00f; /* Color de fondo del botón */
+    color: #fff; /* Color del texto del botón */
+    text-decoration: none; /* Elimina el subrayado del enlace */
+    border-radius: 5px; /* Ajusta el radio de los bordes del botón según tu preferencia */
+}
+
+#informacion-adicional a:hover {
+    background-color: #710293; /* Cambia el color de fondo al pasar el ratón por encima */
+}
+

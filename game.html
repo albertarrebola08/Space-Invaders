@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+  <!-- jquery -->
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <title>Space Invaders</title>
+</head>
+<body class="bg-gray-200">
+  <canvas id="gameCanvas" width="600" height="400">
+
+    <!-- Modal Game Over -->
+  <div class="modal fade" id="gameOverModal" tabindex="-1" role="dialog" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="gameOverModalLabel">Game Over</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Has perdido. ¿Quieres intentarlo de nuevo?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="tryAgainBtn">Try Again</button>
+          <a href="index.html" class="btn btn-secondary">Exit</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </canvas>
+  <audio id="backgroundMusic" autoplay loop>
+    <source src="bg-music.mp3" type="audio/mpeg">
+  </audio>
+  
+  <script src="index.js"></script>
+ 
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
