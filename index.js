@@ -41,7 +41,7 @@ const selectedShipImage = localStorage.getItem('rutaImagen') || 'player2.png';
   const bulletHeight = objectDimensions.bullet.height;
   
 
-
+var enemyShipSpeed = '0.6'
   //configuracion del funcionamiento del juego
   const playerShipSpeed = 4;
   switch (selectedDifficulty){
