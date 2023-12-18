@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 };
 const selectedShipImage = localStorage.getItem('rutaImagen') || 'player2.png';
   // Obtener la dificultad desde el localStorage
-  const selectedDifficulty = localStorage.getItem('dificultad') || 1;
+  const selectedDifficulty = localStorage.getItem('dificultad') || '1';
 
 
 //importo sonidos
