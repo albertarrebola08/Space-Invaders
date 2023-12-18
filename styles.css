@@ -20,7 +20,8 @@ body {
 }
 
 h1{
-    font-family: 'Press Start 2P';   
+    font-family: 'Press Start 2P';
+    color: darkgray;   
 }
 .header{
     display: flex;
@@ -33,7 +34,9 @@ h1{
     background-repeat: no-repeat;
     font-family: 'Space Mono';
 }
-
+h2{
+    font-size: 18px;
+}
 /* Estilo para el contenedor rectangular con borde redondeado y fondo transparente */
 #modelosNaveContainer {
     display: flex;
@@ -41,7 +44,7 @@ h1{
     border-radius: 10px; /* Ajusta el radio de los bordes según tu preferencia */
     background-color: rgba(0, 0, 0, 0.5); /* Fondo transparente con opacidad 50% */
     padding: 10px; /* Ajusta el espacio interno según tu preferencia */
-    margin-bottom: 20px; /* Ajusta el margen inferior según tu preferencia */
+   
 }
 
 /* Ajustes adicionales para las naves dentro del contenedor */
@@ -60,8 +63,10 @@ h1{
 }
 #modelosNaveContainer{
     display: flex;
+    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    gap: 50px;
+    gap:20px
 }
 .modeloNave:hover {
     border-color: #fff;
@@ -70,12 +75,13 @@ h1{
 .modeloNave.seleccionado {
     border-color: #00ff00; /* Cambia el color de resaltado según tu preferencia */
 }
-
+#seleccion{
+   margin-bottom: 0; 
+}
 #dificultad {
     text-align: center;
     padding: 20px;
     position: relative;
-
 }
 
 #selectDificultad {
@@ -88,7 +94,7 @@ h1{
     padding: 20px;
     background-color: slategrey;
     border-radius: 10px;
-    
+    font-family: calibri;
     font-size: 14px;
     position: relative;
     margin: 0 auto; /* Para centrar horizontalmente */
