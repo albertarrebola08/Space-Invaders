@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var  gameInProgress = ''
   const objectDimensions = {
-    playerShip: { width: 80, height: 80 },
-    enemy: { width: 50, height: 50 },
-    coin: { width: 20, height: 20 },
-    life: { width: 30, height: 30   },
+    playerShip: { width: 100, height: 100 },
+    enemy: { width: 80, height: 80 },
+    coin: { width: 30, height: 30 },
+    life: { width: 40, height: 40   },
     bullet: { width: 5, height: 10 },
-    explosion: {width: 50, height: 50}
+    explosion: {width: 70, height: 70}
 };
 const selectedShipImage = localStorage.getItem('rutaImagen') || 'player2.png';
   // Obtener la dificultad desde el localStorage
