@@ -533,31 +533,31 @@ function draw() {
 
   function getRandomObjectType(selectedDifficulty) {
     const randomNumber = Math.random();
-    let enemyProbability = 0.48; // Probabilidad predeterminada para las naves enemigas
+    let enemyProbability = 0.5; // Probabilidad predeterminada para las naves enemigas
   
     // Ajusta la probabilidad de las naves enemigas según el nivel de dificultad
     switch (selectedDifficulty) {
       case '1':
-        enemyProbability = 0.3; // Por ejemplo, disminuir la probabilidad en el nivel 1
+        enemyProbability = 0.5; // 50% de probabilidad de ser una nave enemiga en fácil
         break;
       case '2':
-        enemyProbability = 0.5; // Por ejemplo, mantener la probabilidad en el nivel 2
+        enemyProbability = 0.6; // 60% de probabilidad de ser una nave enemiga en intermedio
         break;
       case '3':
-        enemyProbability = 0.9; // Por ejemplo, aumentar la probabilidad en el nivel 3
+        enemyProbability = 0.8; // 80% de probabilidad de ser una nave enemiga en avanzado
         break;
       // Puedes ajustar los valores según tus necesidades
     }
   
-    if (randomNumber < 0.09) {
+    if (randomNumber < 0.02) {
       return 'life'; // 2% de probabilidad de ser una vida
-    } else if (randomNumber < 0.09 + enemyProbability) {
+    } else if (randomNumber < 0.02 + enemyProbability) {
       return 'enemy'; // Probabilidad ajustada para las naves enemigas
     } else {
       return 'coin'; // Probabilidad ajustada para las monedas
     }
   }
-
+  
   function getRandomEnemyType() {
     const randomNumber = Math.random();
     if (randomNumber < 0.33) {
