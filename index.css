@@ -2,12 +2,12 @@ canvas {
   width: 100vw;
   height: 100vh;
   background-image: url('bg.jpg');
+  background-position: center center;
+  background-repeat: no-repeat ;
   background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
-
+   
 /* Estilo adicional para los botones si lo necesitas */
 button {
   margin: 5px;
