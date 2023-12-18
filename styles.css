@@ -85,8 +85,9 @@ h2{
 }
 
 #selectDificultad {
-    padding: 10px;
-    font-size: 16px;
+    padding:5px;
+    border-radius: 5px;
+    font-size: 12px;
 }
 
 #informacion-adicional {
@@ -116,3 +117,45 @@ h2{
     background-color: #710293; /* Cambia el color de fondo al pasar el ratón por encima */
 }
 
+button{
+    border-radius: 20px;
+    padding: 15px;
+    background-color: brown;
+    color: white;
+    font-family: 'Press Start 2P';
+}
+button:hover{
+    background-color: rgb(212, 151, 21);
+}
+
+/* MODAAAAAL GAME OVER */
+
+.modal {
+    display: none; /* Inicialmente oculto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+  }
+  
+  /* Estilo para el contenido del modal */
+  .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Estilo para el botón de cerrar (reiniciar en este caso) */
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+  }

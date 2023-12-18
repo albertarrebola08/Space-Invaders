@@ -6,12 +6,14 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono&display=swap" rel="stylesheet">
+    
     <title>Mi Juego de Naves Espaciales</title>
 </head>
 <body>
+    <audio id="backgroundMusic" autoplay loop>
+    <source src="bg-music.mp3" type="audio/mpeg">
+  </audio>
     <div class="container-fluid">
         <div class="header">
             <!-- 1. Contenido de la portada, por ejemplo, el título y una imagen -->
@@ -30,16 +32,16 @@
                 <div id="modelosNaveContainer">
                     <h2>Selecciona tu Nave</h2>
                     <div id="modelosNave" class="filaModelos">
-                        <div class="modeloNave" onclick="seleccionarModelo('nave1', this)">
+                        <div class="modeloNave">
                             <img src="player1.png" alt="Nave 1" width="100" height="100">
                         </div>
-                        <div class="modeloNave" onclick="seleccionarModelo('nave2', this)">
+                        <div class="modeloNave">
                             <img src="player2.png" alt="Nave 2" width="100" height="100">
                         </div>
-                        <div class="modeloNave" onclick="seleccionarModelo('nave3', this)">
+                        <div class="modeloNave">
                             <img src="player3.png" alt="Nave 3" width="100" height="100">
                         </div>
-                        <div class="modeloNave" onclick="seleccionarModelo('nave4', this)">
+                        <div class="modeloNave">
                             <img src="player4.png" alt="Nave 4" width="100" height="100">
                         </div>
                     </div>
@@ -50,15 +52,15 @@
                 <!-- 4. Selección de Dificultad -->
                 <h2>Selecciona la Dificultad</h2>
                 <select id="selectDificultad">
-                    <option value="facil">Fácil</option>
-                    <option value="intermedio">Intermedio</option>
-                    <option value="avanzado">Avanzado</option>
+                    <option value="1">Fácil</option>
+                    <option value="2">Intermedio</option>
+                    <option value="3">Avanzado</option>
                 </select>
             </div>
 
             <div id="inicio">
                 <!-- Botón para iniciar el juego -->
-                <button onclick="iniciarJuego()">Iniciar Juego</button>
+                <a href="game.html"><button>Iniciar Juego</button></a>
             </div>
         </div>
     </div>
@@ -68,6 +70,67 @@
         <a href="ruta/del/informe.pdf" download="Informe Space Invaders">Descargar Informe</a>
     </div>
 
-    <script src="script.js"></script>
+    <script src="index.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const imagenesNave = document.querySelectorAll('.modeloNave img');
+            const selectDificultad = document.getElementById('selectDificultad');
+    
+            // Función para manejar el clic en las imágenes de nave
+            function handleImagenNaveClick(rutaImagen) {
+                // Imprimir la ruta de la imagen en la consola
+                console.log('Ruta de la imagen seleccionada:', rutaImagen);
+    
+                // Guardar la ruta de la imagen en localStorage
+                localStorage.setItem('rutaImagen', rutaImagen);
+            }
+    
+            // Función para manejar el cambio en el elemento select de dificultad
+            function handleDificultadChange() {
+                // Obtener el valor seleccionado (1, 2 o 3)
+                const valorDificultad = selectDificultad.value;
+    
+                // Imprimir el valor de dificultad en la consola
+                console.log('Dificultad seleccionada:', valorDificultad);
+    
+                // Guardar el valor de dificultad en localStorage
+                localStorage.setItem('dificultad', valorDificultad);
+            }
+    
+            // Agregar un evento de clic a cada imagen de nave
+            imagenesNave.forEach(imagen => {
+                imagen.addEventListener('click', function () {
+                    // Obtener la ruta de la imagen al hacer clic
+                    const rutaImagen = imagen.getAttribute('src');
+    
+                    // Llamar a la función para manejar el clic en las imágenes de nave
+                    handleImagenNaveClick(rutaImagen);
+                });
+            });
+    
+            // Agregar un evento de cambio al elemento select de dificultad
+            selectDificultad.addEventListener('change', handleDificultadChange);
+    
+            // Al cargar la página, verificar si hay una ruta de imagen y dificultad guardadas en localStorage
+            const rutaImagenGuardada = localStorage.getItem('rutaImagen');
+            const dificultadGuardada = localStorage.getItem('dificultad');
+    
+            // Establecer la ruta de la imagen guardada como la imagen seleccionada
+            if (rutaImagenGuardada) {
+                imagenesNave.forEach(imagen => {
+                    if (imagen.getAttribute('src') === rutaImagenGuardada) {
+                        // Puedes resaltar visualmente la imagen seleccionada si lo deseas
+                        imagen.classList.add('seleccionada')
+                    }
+                });
+            }
+    
+            // Establecer la dificultad guardada como la opción seleccionada en el elemento selectDificultad
+            if (dificultadGuardada) {
+                selectDificultad.value = dificultadGuardada;
+            }
+        });
+    </script>
+    
 </body>
 </html>

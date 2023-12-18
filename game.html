@@ -11,33 +11,21 @@
   <title>Space Invaders</title>
 </head>
 <body class="bg-gray-200">
+  <audio id="backgroundMusic" autoplay loop>
+    <source src="music-game.mp3" type="audio/mpeg">
+ </audio>
   <canvas id="gameCanvas" width="600" height="400">
-
-    <!-- Modal Game Over -->
-  <div class="modal fade" id="gameOverModal" tabindex="-1" role="dialog" aria-labelledby="gameOverModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+  
+    <div id="gameOverModal" class="modal">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="gameOverModalLabel">Game Over</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>Has perdido. ¿Quieres intentarlo de nuevo?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="tryAgainBtn">Try Again</button>
-          <a href="index.html" class="btn btn-secondary">Exit</a>
-        </div>
+        <span class="close" onclick="restartGame()">&times;</span>
+        <p>¡Se acabó el juego!</p>
+        <button onclick="restartGame()">Reiniciar Juego</button>
       </div>
     </div>
-  </div>
-
-  </canvas>
-  <audio id="backgroundMusic" autoplay loop>
-    <source src="bg-music.mp3" type="audio/mpeg">
-  </audio>
+  
+  </canvas> 
+  
   
   <script src="index.js"></script>
  

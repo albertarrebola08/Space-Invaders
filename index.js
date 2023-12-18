@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight
 
+  var  gameInProgress = ''
   const objectDimensions = {
     playerShip: { width: 100, height: 100 },
     enemy: { width: 70, height: 70 },
@@ -13,6 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
     bullet: { width: 5, height: 10 },
     explosion: {width: 80, height: 80}
 };
+const selectedShipImage = localStorage.getItem('rutaImagen') || 'player2.png';
+  // Obtener la dificultad desde el localStorage
+  const selectedDifficulty = localStorage.getItem('dificultad') || 1;
+
 
 //importo sonidos
    const lifeSound = new Audio('life.mp3');
@@ -35,9 +40,17 @@ document.addEventListener('DOMContentLoaded', function () {
   const bulletWidth = objectDimensions.bullet.width;
   const bulletHeight = objectDimensions.bullet.height;
   
+
+
   //configuracion del funcionamiento del juego
   const playerShipSpeed = 4;
-  const enemyShipSpeed = 0.6;
+  switch (selectedDifficulty){
+    case '1': enemyShipSpeed = 0.6
+    break
+    case '2': enemyShipSpeed = 1.2
+    break
+    case '3': enemyShipSpeed = 2
+  }
   const coinSpeed = 0.5;
   const lifeSpeed = 0.3;
   const bulletSpeed = 5;
@@ -53,18 +66,17 @@ document.addEventListener('DOMContentLoaded', function () {
   let score = 0;
   const bulletCollisions = [];
 
-  //dsf
-  let defenseTroops = 50; // Inicializar con el valor correspondiente a la dificultad 1
-  let difficulty = 3     ; // Puedes cambiar esto según la dificultad del juego
 
-  switch (difficulty) {
-    case 1:
+  let defenseTroops = 50; // Inicializar con el valor correspondiente a la dificultad 1     ; // Puedes cambiar esto según la dificultad del juego
+
+  switch (selectedDifficulty) {
+    case '1':
       defenseTroops = 50;
       break;
-    case 2:
+    case '2':
       defenseTroops = 30;
       break;
-    case 3:
+    case '3':
       defenseTroops = 15;
       break;
     // Añade más casos según sea necesario
@@ -75,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
     y: canvas.height - objectDimensions.playerShip.height,
     speed: playerShipSpeed,
     type: 'player',
-    firing: false
+    firing: false,
   };
 
   const coinImage = new Image();
@@ -101,11 +113,12 @@ document.addEventListener('DOMContentLoaded', function () {
   
   const playerShipImage = new Image();
   playerShipImage.onload = startGame; // Llama a startGame cuando la imagen de la nave del jugador se carga
-  playerShipImage.src = 'player2.png';
+  playerShipImage.src = selectedShipImage;
   
   let imagesLoaded = 0;
   
   function startGame() {
+    gameInProgress == 'true'
     imagesLoaded++;
     if (imagesLoaded === 5) {
       // Todas las imágenes están cargadas, inicia el juego
@@ -219,6 +232,10 @@ function moveObjects() {
 
         // Log o mensaje para informar sobre la disminución de tropas
         console.log('Tropas de defensa restantes:', defenseTroops);
+        if(defenseTroops <= 0){
+          alert('Game Over - Los enemigos han superado tu defensa...')
+          resetGame()
+        } 
       }
 
       // Elimina el objeto de la matriz
@@ -227,10 +244,6 @@ function moveObjects() {
   }
 }
 
-
-
-
-  
   
   //controlo la colision miro de que tipo es y llamo a una funcion o a otra
   function handleCollision(object) {
@@ -252,6 +265,11 @@ function moveObjects() {
   let lastEnemyCollisionTime = 0;
   const collisionCooldown = 1000; // 1000 milisegundos (1 segundo)
 
+
+
+
+
+
 function handleEnemyCollision(enemy) {
   // Verificar si ha pasado suficiente tiempo desde la última colisión
   const currentTime = Date.now();
@@ -259,8 +277,8 @@ function handleEnemyCollision(enemy) {
     // Restar vidas (ajustar según tus necesidades)
     lives -= 1;
     if (lives <= 0) {
-      alert('Game over - No tienes más vidas !!!')
-        resetGame();
+      alert('Game Over - Ya no te quedan vidas')
+      resetGame()
     }
     
 
@@ -513,17 +531,32 @@ function draw() {
     }
   }
 
-  function getRandomObjectType() {
+  function getRandomObjectType(selectedDifficulty) {
     const randomNumber = Math.random();
+    let enemyProbability = 0.48; // Probabilidad predeterminada para las naves enemigas
+  
+    // Ajusta la probabilidad de las naves enemigas según el nivel de dificultad
+    switch (selectedDifficulty) {
+      case '1':
+        enemyProbability = 0.3; // Por ejemplo, disminuir la probabilidad en el nivel 1
+        break;
+      case '2':
+        enemyProbability = 0.5; // Por ejemplo, mantener la probabilidad en el nivel 2
+        break;
+      case '3':
+        enemyProbability = 0.9; // Por ejemplo, aumentar la probabilidad en el nivel 3
+        break;
+      // Puedes ajustar los valores según tus necesidades
+    }
+  
     if (randomNumber < 0.09) {
       return 'life'; // 2% de probabilidad de ser una vida
-    } else if (randomNumber < 0.52) {
-      return 'coin'; // 50% de probabilidad de ser una moneda
+    } else if (randomNumber < 0.09 + enemyProbability) {
+      return 'enemy'; // Probabilidad ajustada para las naves enemigas
     } else {
-      return 'enemy'; // 48% de probabilidad de ser una nave enemiga
+      return 'coin'; // Probabilidad ajustada para las monedas
     }
   }
-  
 
   function getRandomEnemyType() {
     const randomNumber = Math.random();
