@@ -115,7 +115,7 @@ h2{
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: ;
+    
 }
 
 #informacion-adicional a:hover {
@@ -125,12 +125,13 @@ h2{
 button{
     border-radius: 20px;
     padding: 15px;
-    background-color: brown;
-    color: white;
+    background-color: rgb(68, 219, 156);
+    color: black;
     font-family: 'Press Start 2P';
 }
 button:hover{
     background-color: rgb(212, 151, 21);
+    color: white;
 }
 
 /* MODAAAAAL GAME OVER */
